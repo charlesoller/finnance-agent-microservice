@@ -1,4 +1,9 @@
 # finnance-agent-microservice
+To run:
+```
+fastapi dev src/main.py --port 3002
+```
+
 Linting: 
 - Uses pylint, flake8, black, isort, and mypy
 - To run:

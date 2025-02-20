@@ -7,18 +7,24 @@ from typing import Any, Dict, List, Optional
 
 from fastapi.responses import StreamingResponse
 
-from src.utils import ChatMessage, GraphResponse, MessageOwner
-
+from src.utils import (
+    ChatMessage,
+    GraphResponse,
+    MessageOwner,
+    FormattedMessageOwner,
+    format_history
+)
 
 class AgentService:
     """This class contains the functionality for the OpenAI chat completions"""
 
-    def __init__(self, openai, instructions, model, tools, db):
+    def __init__(self, openai, instructions, model, tools, db, session_service):
         self.__openai = openai
         self.__system_prompt = instructions
         self.__model = model
         self.__tools = tools
         self.__db = db
+        self.__session_service = session_service
 
     async def handle_message(
         self, message: str, history: List[ChatMessage], user_id: str, session_id: str
@@ -29,6 +35,17 @@ class AgentService:
             session_id=session_id,
             message_type=MessageOwner.USER,
             message_content=message,
+        )
+
+        is_first_message = len(history) == 0
+        updated_history = format_history(history)
+        updated_history.append({
+            "role": FormattedMessageOwner.USER,
+            "content": message
+        })
+
+        self.__session_service.update_session(
+            session_id=session_id, history=updated_history, is_first_message=is_first_message
         )
 
         return StreamingResponse(
@@ -64,19 +81,10 @@ class AgentService:
             session_id=session_id,
             message_type=MessageOwner.AI,
             message_content=dict_response.get("message", ""),
+            graph_data=dict_response.get("graph", None)
         )
 
         yield "data: [DONE]\n\n"
-
-    def __format_history(self, history: List[ChatMessage]):
-        """Formats chat log history for ChatGPT context"""
-        formatted = []
-        for message in history:
-            role: str = message["message_type"].lower()
-            if role == "ai":
-                role = "assistant"
-            formatted.append({"role": role, "content": message["message_content"]})
-        return formatted
 
     async def __save_message(
         self,
@@ -109,7 +117,7 @@ class AgentService:
             "model": self.__model,
             "messages": [
                 {"role": "developer", "content": self.__system_prompt},
-                *self.__format_history(history),
+                *format_history(history),
                 {"role": "user", "content": message},
             ],
             "response_format": {"type": "json_object"},
