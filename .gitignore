@@ -1,0 +1,5 @@
+/env.json
+.env
+.aws-sam/
+.mypy_cache/
+venv/
