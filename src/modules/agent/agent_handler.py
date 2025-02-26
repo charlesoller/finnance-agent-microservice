@@ -21,7 +21,12 @@ class AgentHandler:
         history = payload.get("history", [])
         session_id = payload.get("session_id", "")
         user_id = payload.get("user_id", "")
+        context = payload.get("context", [])
 
         return await self.__agent_service.handle_message(
-            message=message, history=history, session_id=session_id, user_id=user_id
+            message=message,
+            history=history,
+            session_id=session_id,
+            user_id=user_id,
+            context=context,
         )

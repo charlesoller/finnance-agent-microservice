@@ -18,11 +18,13 @@ class MessageOwner(str, Enum):
     USER = "user"
     AI = "ai"
 
+
 class FormattedMessageOwner(str, Enum):
     """This class represents the formatted names for message owners"""
 
     USER = "user"
     ASSISTANT = "assistant"
+
 
 class ChartDataPoint(TypedDict):
     """
@@ -51,6 +53,7 @@ class ChatMessage(TypedDict):
     session_id: str
     timestamp: str
     graph_data: Optional[GraphResponse]
+
 
 class FormattedChatMessage(TypedDict):
     """This class represents the shape of ChatMessage data"""

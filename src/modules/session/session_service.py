@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 
 from src.utils import SUMMARY_PROMPT, FormattedChatMessage
 
+
 class SessionService:
     """This class contains all functionality relevant to sessions"""
 
@@ -14,7 +15,10 @@ class SessionService:
         self.__openai = openai
 
     def update_session(
-        self, session_id: str, history: List[FormattedChatMessage], is_first_message: bool
+        self,
+        session_id: str,
+        history: List[FormattedChatMessage],
+        is_first_message: bool,
     ):
         """This method is responsible for updating session info"""
         if is_first_message:
@@ -64,7 +68,9 @@ class SessionService:
         except Exception as e:
             raise RuntimeError(f"Failed to update session: {e}") from e
 
-    def __create_new_session(self, session_id: str, history: List[FormattedChatMessage]):
+    def __create_new_session(
+        self, session_id: str, history: List[FormattedChatMessage]
+    ):
         timestamp = datetime.now(timezone.utc).isoformat()
         session_name = self.__generate_session_name(history)
 

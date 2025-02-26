@@ -2,10 +2,10 @@
 
 from typing import List
 
-from .types import ChatMessage, FormattedChatMessage
+from .types import ChatMessage
 
 
-def format_history(history: List[ChatMessage]) -> List[FormattedChatMessage]:
+def format_history(history: List[ChatMessage]):
     """Formats chat log history for ChatGPT context"""
     formatted = []
     for message in history:
