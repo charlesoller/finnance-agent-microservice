@@ -1,7 +1,7 @@
 # pylint: skip-file
 """Consts for all agent params"""
 
-from src.utils.prompts import AGENT_PROMPT
+from app.utils.prompts import AGENT_PROMPT
 
 AGENT_INSTRUCTIONS = AGENT_PROMPT
 AGENT_MODEL = "gpt-4o-mini"

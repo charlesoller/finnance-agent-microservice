@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi.responses import StreamingResponse
 
-from src.utils import (
+from app.utils import (
     ChatMessage,
     FormattedMessageOwner,
     GraphResponse,

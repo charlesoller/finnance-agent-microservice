@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
-from src.utils import SUMMARY_PROMPT, FormattedChatMessage
+from app.utils import SUMMARY_PROMPT, FormattedChatMessage
 
 
 class SessionService:
