@@ -3,8 +3,8 @@ FROM python:3.9-slim
 WORKDIR /code
 
 # Copy requirements first to leverage Docker cache
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-eb.txt .
+RUN pip install --no-cache-dir -r requirements-eb.txt
 
 # Copy application code
 COPY ./app ./app
