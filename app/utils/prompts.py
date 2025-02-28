@@ -17,7 +17,7 @@ Rules:
 3. **Keys**:
   "message" - This key holds the text the user will read.
     Example: {"message": "Your example message here"}
-    
+ 
   "graph" - This key holds data intended to be visualized in graph form. 
     Primarily used for financial estimations or trends, but only if the question makes sense to graph.
     The **"type"** field is always required if the "graph" key is included, and it indicates the type of graph:

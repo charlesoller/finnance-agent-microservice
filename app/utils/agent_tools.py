@@ -109,7 +109,9 @@ def calculate_compound_interest(
         )
         # Add contributions for partial year
         partial_contributions = (
-            Decimal(str(additional_contribution)) * Decimal(str(contributions_per_year)) * Decimal(str(remaining_time))
+            Decimal(str(additional_contribution))
+            * Decimal(str(contributions_per_year))
+            * Decimal(str(remaining_time))
         )
         total += partial_contributions
         total_contributions += partial_contributions
