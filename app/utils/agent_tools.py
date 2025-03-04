@@ -7,6 +7,8 @@ from typing import Dict, Literal, Union
 
 import requests
 from dotenv import load_dotenv
+import logging
+import traceback
 
 
 def calculate_compound_interest(
@@ -106,7 +108,6 @@ def calculate_compound_interest(
         # Compound interest for partial year
         total *= (1 + Decimal(str(rate)) / Decimal(str(compounds_per_year))) ** (
             Decimal(str(compounds_per_year)) * Decimal(str(remaining_time))
-        )
         # Add contributions for partial year
         partial_contributions = (
             Decimal(str(additional_contribution))
@@ -193,29 +194,65 @@ def get_transaction_details(transaction_ids: list[str]):
         requests.exceptions.RequestException: For other request-related errors.
         OSError: If environment variables are not properly configured.
     """
-
-    load_dotenv()
-    API_URL = os.getenv("API_URL")
-
-    if not API_URL:
-        raise OSError("API_URL environment variable is not set.")
-
-    headers = {"Content-Type": "application/json"}
-    transaction_details = []
-
-    for transaction_id in transaction_ids:
-        url = f"{API_URL}/financial-connections/transactions/{transaction_id}"
-        response = requests.get(url, headers=headers, timeout=10)
-
-        if response.status_code == 200:
-            data = response.json()
-
-            # Convert balance values from cents to dollars
-            if "amount" in data:
-                data["amount"] /= 100
-
-            transaction_details.append(data)
-        else:
-            response.raise_for_status()
-
-    return transaction_details
+    # Configure logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        load_dotenv()
+        API_URL = os.getenv("API_URL")
+        
+        logger.info(f"API_URL: {API_URL}")
+        
+        if not API_URL:
+            logger.error("API_URL environment variable is not set")
+            raise OSError("API_URL environment variable is not set.")
+            
+        headers = {"Content-Type": "application/json"}
+        transaction_details = []
+        
+        logger.info(f"Processing {len(transaction_ids)} transaction IDs")
+        
+        for transaction_id in transaction_ids:
+            try:
+                url = f"{API_URL}/financial-connections/transactions/{transaction_id}"
+                logger.info(f"Making request to: {url}")
+                
+                response = requests.get(url, headers=headers, timeout=10)
+                logger.info(f"Response status code: {response.status_code}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    logger.debug(f"Raw response data: {data}")
+                    
+                    # Convert balance values from cents to dollars
+                    if "amount" in data:
+                        data["amount"] /= 100
+                        logger.debug(f"Converted amount to dollars: {data['amount']}")
+                    
+                    transaction_details.append(data)
+                else:
+                    logger.error(f"Request failed with status code: {response.status_code}")
+                    logger.error(f"Response content: {response.text}")
+                    response.raise_for_status()
+            except requests.exceptions.HTTPError as http_err:
+                logger.error(f"HTTP error for transaction ID {transaction_id}: {http_err}")
+                logger.error(f"Response details: {response.text if 'response' in locals() else 'No response'}")
+                raise
+            except requests.exceptions.RequestException as req_err:
+                logger.error(f"Request error for transaction ID {transaction_id}: {req_err}")
+                raise
+            except Exception as e:
+                logger.error(f"Unexpected error for transaction ID {transaction_id}: {e}")
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                raise
+                
+        logger.info(f"Successfully retrieved details for {len(transaction_details)} transactions")
+        return transaction_details
+        
+    except OSError as os_err:
+        logger.error(f"OS Error: {os_err}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in get_transaction_details: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise

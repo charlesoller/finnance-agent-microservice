@@ -1,7 +1,7 @@
 # finnance-agent-microservice
 To run:
 ```
-fastapi dev src/main.py --port 3002
+fastapi dev app/main.py --port 3002
 ```
 
 Linting: 
