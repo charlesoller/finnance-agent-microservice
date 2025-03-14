@@ -25,6 +25,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai = OpenAI(api_key=OPENAI_API_KEY)
 async_openai = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
+
 # Database
 if os.getenv("ENV") == "local":
     logger.info(f"Connecting to local DynamoDB at: {DYNAMODB_ENDPOINT}")
