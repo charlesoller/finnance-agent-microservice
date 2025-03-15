@@ -6,6 +6,7 @@ from app.utils.prompts import AGENT_PROMPT
 AGENT_INSTRUCTIONS = AGENT_PROMPT
 AGENT_MODEL = "gpt-4o-mini"
 AGENT_TOOLS = [
+    {"type": "web_search_preview"},
     {
         "type": "function",
         "name": "calculate_compound_interest",

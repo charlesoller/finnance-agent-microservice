@@ -259,15 +259,15 @@ class AgentService:
         """Returns params for Completion API call"""
         params: Dict[str, Any] = {
             "model": self.__model,
-            # "instructions": self.__system_prompt,
+            "instructions": self.__system_prompt,
             "input": [
-                {"role": "developer", "content": self.__system_prompt},
+                # {"role": "developer", "content": self.__system_prompt},
                 *format_history(history),
                 {"role": "user", "content": message},
             ],
-            "text": {
-                "format": {"type": "json_object"}
-            },
+            # "text": {
+            #     "format": {"type": "json_object"}
+            # },
             # "response_format": {"type": "json_object"},
             "tools": self.__tools,
             "tool_choice": "auto",
