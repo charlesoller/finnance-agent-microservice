@@ -113,93 +113,69 @@ class AgentService:
             )
         )
 
-        # async for chunk in response_stream:
-            # print(f"The chunk: {chunk} \n\n")
-            # print(f"Chunk Type: {chunk.type}\n\n")
-            # Handle tool calls
-            # if chunk.choices[0].delta.tool_calls:
-            #     for tool_call in chunk.choices[0].delta.tool_calls:
-            #         index = tool_call.index
-            #         if index not in final_tool_calls:
-            #             final_tool_calls[index] = tool_call
-            #         else:
-            #             final_tool_calls[
-            #                 index
-            #             ].function.arguments += tool_call.function.arguments
-            #     continue
-
-            # Handle content
-            # if chunk.choices[0].delta.content is not None:
-            #     content = chunk.choices[0].delta.content
-            #     full_response += content
-            #     yield f"data: {json.dumps({'content': content})}\n\n"
-
         async for chunk in response_stream:
             print(f"\nChunk Type: {chunk.type}\n")
-        
-            if (chunk.type == 'response.output_item.added'):
+
+            if chunk.type == "response.output_item.added":
                 print(f"Test Chunk: {chunk}")
                 item = chunk.item
                 index = chunk.output_index
-                if item and item.type == 'function_call':
+                if item and item.type == "function_call":
                     function_name = item.name
                     final_tool_calls[index] = {
-                        "function": {
-                            "name": function_name,
-                            "arguments": ''
-                        }
+                        "function": {"name": function_name, "arguments": ""}
                     }
 
-            if (chunk.type == 'response.function_call_arguments.delta'):
+            if chunk.type == "response.function_call_arguments.delta":
                 # Handles custom tool call chunks
-                print(f'Tool Chunk: {chunk}\n\n')
+                print(f"Tool Chunk: {chunk}\n\n")
                 index = chunk.output_index
                 content = chunk.delta
                 # Correctly append to the arguments string
                 if index in final_tool_calls:
                     final_tool_calls[index]["function"]["arguments"] += content
 
-            if (chunk.type == 'response.output_text.delta'):
+            if chunk.type == "response.output_text.delta":
                 # Handles text response
-                print(f'\nText Chunk: {chunk} \n')
+                print(f"\nText Chunk: {chunk} \n")
                 content = chunk.delta
                 full_response += content
                 yield f"data: {json.dumps({'content': content})}\n\n"
 
         if final_tool_calls:
-                print(f"\nProcessing tools in current chain: {final_tool_calls}")
-                current_chain_context = (
-                    context.copy() if context is not None else []
-                )  # Keep context only within this chain
+            print(f"\nProcessing tools in current chain: {final_tool_calls}")
+            current_chain_context = (
+                context.copy() if context is not None else []
+            )  # Keep context only within this chain
 
-                for index, tool_call in final_tool_calls.items():
-                    function_name = tool_call["function"]["name"]
-                    try:
-                        arguments = json.loads(tool_call["function"]["arguments"])
-                        tool_result = await self.__execute_tool(function_name, arguments)
-                        print(f"\nTool results: {tool_result}\n")
+            for index, tool_call in final_tool_calls.items():
+                function_name = tool_call["function"]["name"]
+                try:
+                    arguments = json.loads(tool_call["function"]["arguments"])
+                    tool_result = await self.__execute_tool(function_name, arguments)
+                    print(f"\nTool results: {tool_result}\n")
 
-                        if tool_result:
-                            # Add new tool result to the current chain's context
-                            current_chain_context.append(
-                                f"Result from {function_name}: {str(tool_result)}"
-                            )
-
-                            # Recursive call with current chain's context
-                            async for response_chunk in self.__generate_response(
-                                message=message,  # Keep original message
-                                history=history,
-                                user_id=user_id,
-                                session_id=session_id,
-                                context=current_chain_context,
-                            ):
-                                yield response_chunk
-
-                    except json.JSONDecodeError:
-                        print(
-                            f"Failed to parse tool arguments: {tool_call['function']['arguments']}"
+                    if tool_result:
+                        # Add new tool result to the current chain's context
+                        current_chain_context.append(
+                            f"Result from {function_name}: {str(tool_result)}"
                         )
-                        continue
+
+                        # Recursive call with current chain's context
+                        async for response_chunk in self.__generate_response(
+                            message=message,  # Keep original message
+                            history=history,
+                            user_id=user_id,
+                            session_id=session_id,
+                            context=current_chain_context,
+                        ):
+                            yield response_chunk
+
+                except json.JSONDecodeError:
+                    print(
+                        f"Failed to parse tool arguments: {tool_call['function']['arguments']}"
+                    )
+                    continue
 
         # Only save and finish when we have no more tool calls
         if not final_tool_calls:

@@ -37,7 +37,7 @@ if os.getenv("ENV") == "local":
         aws_secret_access_key="dummy",
     )
 else:
-    dynamodb = boto3.resource("dynamodb", region_name='us-east-1')
+    dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 
 CHAT_LOGS_TABLE_NAME = "chat_logs"
 SESSION_INFO_TABLE_NAME = "session_info"
