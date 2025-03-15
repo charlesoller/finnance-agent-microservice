@@ -34,7 +34,7 @@ MarkupSafe==3.0.2
 mccabe==0.7.0
 mdurl==0.1.2
 nodeenv==1.9.1
-openai==1.63.2
+openai==1.66.3
 packaging==24.2
 pathspec==0.10.1
 platformdirs==4.3.6
